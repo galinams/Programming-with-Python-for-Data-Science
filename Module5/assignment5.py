@@ -21,7 +21,7 @@ def plotDecisionBoundary(model, X, y):
   y_range = y_max - y_min
   x_min -= x_range * padding
   y_min -= y_range * padding
-  x_max += x_range * padding
+  x_max += x_range * padding 
   y_max += y_range * padding
 
   # Create a 2D Grid Matrix. The values stored in the matrix
@@ -52,31 +52,39 @@ def plotDecisionBoundary(model, X, y):
 # loading your data properly--don't fail on the 1st step!
 #
 # .. your code here ..
+X = pd.read_csv("C:\DAT207x\Programming with Python for Data Science\Module5\Datasets\wheat.data", index_col='id')
 
-
+print X.head()
 
 #
 # TODO: Copy the 'wheat_type' series slice out of X, and into a series
 # called 'y'. Then drop the original 'wheat_type' column from the X
 #
 # .. your code here ..
+y = X['wheat_type'].copy()
+X.drop(labels=['wheat_type'], axis=1, inplace=True)
 
-
-
+print X.head()
 # TODO: Do a quick, "ordinal" conversion of 'y'. In actuality our
 # classification isn't ordinal, but just as an experiment...
 #
 # .. your code here ..
+print y.unique()
 
+y = y.astype('category', ordered=True).cat.codes
+        
+print y.unique()
 
-
-#
+print X.dtypes
+print y.dtypes
+print type(y)
 # TODO: Basic nan munging. Fill each row's nans with the mean of the feature
 #
 # .. your code here ..
+print X.isnull().sum()
+X.fillna(X.mean(), inplace=True)
 
-
-
+print X.isnull().sum()
 #
 # TODO: Split X into training and testing data sets using train_test_split().
 # INFO: Use 0.33 test size, and use random_state=1. This is important
@@ -84,8 +92,9 @@ def plotDecisionBoundary(model, X, y):
 # specify a random_state.
 #
 # .. your code here ..
+from sklearn.model_selection import train_test_split
 
-
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.33, random_state=1)
 
 # 
 # TODO: Create an instance of SKLearn's Normalizer class and then train it
@@ -98,7 +107,9 @@ def plotDecisionBoundary(model, X, y):
 # apply your models to.
 #
 # .. your code here ..
-
+from sklearn.preprocessing import Normalizer
+norma = Normalizer()
+norma.fit(X_train, y_train)
 
 
 #
@@ -110,9 +121,8 @@ def plotDecisionBoundary(model, X, y):
 # feature-space as the original data used to train your models.
 #
 # .. your code here ..
-
-
-
+norma.transform(X_train,y_train)
+norma.transform(X_test, y_test)
 
 #
 # TODO: Just like your preprocessing transformation, create a PCA
@@ -125,7 +135,11 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
-
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+pca.fit(X_train, y_train)
+X_train = pca.transform(X_train)
+X_test = pca.transform(X_test)
 
 
 #
@@ -135,9 +149,14 @@ def plotDecisionBoundary(model, X, y):
 # your labels.
 #
 # .. your code here ..
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=1)
+knn.fit(X_train, y_train)
 
+print knn.score(X_test,y_test)
 
-
+print type(X_train)
+print type(y_train)
 
 # HINT: Ensure your KNeighbors classifier object from earlier is called 'knn'
 plotDecisionBoundary(knn, X_train, y_train)
@@ -153,7 +172,7 @@ plotDecisionBoundary(knn, X_train, y_train)
 #
 # .. your code here ..
 
-
+print knn.score(X_test,y_test)
 
 #
 # BONUS: Instead of the ordinal conversion, try and get this assignment

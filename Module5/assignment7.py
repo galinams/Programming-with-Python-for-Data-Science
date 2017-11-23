@@ -58,9 +58,10 @@ def plotDecisionBoundary(model, X, y):
 # Be sure to verify the rows line up by looking at the file in a text editor.
 #
 # .. your code here ..
+import pandas as pd
+df = pd.read_csv("C:/DAT207x/Programming with Python for Data Science/Module5/Datasets/breast-cancer-wisconsin.data", header=None, names=['sample', 'thickness', 'size', 'shape', 'adhesion', 'epithelial', 'nuclei', 'chromatin', 'nucleoli', 'mitoses', 'status'],na_values='?')
 
-
-
+print df.head()
 # 
 # TODO: Copy out the status column into a slice, then drop it from the main
 # dataframe. Always verify you properly executed the drop by double checking
@@ -72,7 +73,14 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+status = df['status'].copy()
 
+df = df.drop(labels = ['status', 'sample'], axis=1)
+
+print df.head()
+print status.head()
+
+print df.describe()
 
 #
 # TODO: With the labels safely extracted from the dataset, replace any nan values
@@ -80,7 +88,9 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+df.fillna(df.mean(), inplace=True)
 
+print df.isnull().sum()
 
 #
 # TODO: Do train_test_split. Use the same variable names as on the EdX platform in
@@ -88,9 +98,9 @@ def plotDecisionBoundary(model, X, y):
 # the test_size at 0.5 (50%).
 #
 # .. your code here ..
+from sklearn.model_selection import train_test_split
 
-
-
+data_train, data_test, label_train, label_test = train_test_split(df,status,random_state=7, test_size=0.5)
 
 #
 # TODO: Experiment with the basic SKLearn preprocessing scalers. We know that
@@ -102,10 +112,30 @@ def plotDecisionBoundary(model, X, y):
 #
 # .. your code here ..
 
+# .. your code here ..
+
+#data_train = norma.transform(data_train)
+#data_test = norma.transform(data_test)
+#from sklearn.preprocessing import StandardScaler
+
+#scaler = StandardScaler().fit(data_train)
+#data_train = scaler.transform(data_train)
+#data_test = scaler.transform(data_test)
+
+from sklearn.preprocessing import MinMaxScaler
+
+minmax = MinMaxScaler().fit(data_train)
+data_train = minmax.transform(data_train)
+data_test = minmax.transform(data_test)
 
 
+#from sklearn.preprocessing import RobustScaler
 
-#
+#robust = RobustScaler().fit(data_train)
+#data_train = robust.transform(data_train)
+#data_test = robust.transform(data_test)
+
+
 # PCA and Isomap are your new best friends
 model = None
 if Test_PCA:
@@ -115,8 +145,10 @@ if Test_PCA:
   # You should reduce down to two dimensions.
   #
   # .. your code here ..
-
-  
+  from sklearn.decomposition import PCA
+  model = PCA(n_components=2, svd_solver='full')
+  PCA(copy=True, n_components=2, whiten=False)
+      
 
 else:
   print "Computing 2D Isomap Manifold"
@@ -126,8 +158,9 @@ else:
   # You should reduce down to two dimensions.
   #
   # .. your code here ..
-  
-
+  from sklearn import manifold
+  model = manifold.Isomap(n_neighbors=5, n_components=2)
+    
 
 
 #
@@ -137,6 +170,9 @@ else:
 #
 # .. your code here ..
 
+model.fit(data_train)
+data_train = model.transform(data_train)
+data_test = model.transform(data_test)
 
 
 # 
@@ -148,7 +184,9 @@ else:
 # parameter affects the results.
 #
 # .. your code here ..
-
+from sklearn.neighbors import KNeighborsClassifier
+knmodel = KNeighborsClassifier(n_neighbors=5, weights='distance')
+knmodel.fit(data_train, label_train)
 
 
 #
@@ -167,6 +205,7 @@ else:
 # TODO: Calculate + Print the accuracy of the testing set
 #
 # .. your code here ..
+print knmodel.score(data_test,label_test)
 
 
-plotDecisionBoundary(knmodel, X_test, y_test)
+plotDecisionBoundary(knmodel, data_test, label_test)

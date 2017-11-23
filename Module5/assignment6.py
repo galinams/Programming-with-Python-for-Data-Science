@@ -52,7 +52,7 @@ def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
   # What class does the classifier say about each spot on the chart?
   # The values stored in the matrix are the predictions of the model
   # at said location:
-  Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+  Z = knn.predict(np.c_[xx.ravel(), yy.ravel()])
   Z = Z.reshape(xx.shape)
 
   # Plot the mesh grid as a filled contour plot:
@@ -98,7 +98,13 @@ def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
 # instead of sideways. This was demonstrated in the M4/A4 code:
 #
 # .. your code here ..
+mat = scipy.io.loadmat('C:/DAT207x/Programming with Python for Data Science/Module4/Datasets/face_data.mat')
+df = pd.DataFrame(mat['images']).T
+num_images, num_pixels = df.shape
+num_pixels = int(math.sqrt(num_pixels))
 
+for i in range(num_images):
+  df.loc[i,:] = df.loc[i,:].reshape(num_pixels, num_pixels).T.reshape(-1)
 
 #
 # TODO: Load up your face_labels dataset. It only has a single column, and
@@ -109,9 +115,18 @@ def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
 # loaded it correctly.
 #
 # .. your code here ..
+face_labels = pd.read_csv("C:/DAT207x/Programming with Python for Data Science/Module5/Datasets/face_labels.csv", header=None)
+print type(face_labels)
+face_labels = face_labels.ix[:,0]
+print type(face_labels)
+
+print face_labels.head()
+
+print len(face_labels)
+
+print df.shape
 
 
-#
 # TODO: Do train_test_split. Use the same code as on the EdX platform in the
 # reading material, but set the random_state=7 for reproduceability, and the
 # test_size from 0.15 (150%). Your labels are actually passed in as a series
@@ -121,7 +136,8 @@ def Plot2DBoundary(DTrain, LTrain, DTest, LTest):
 # than as points:
 #
 # .. your code here ..
-
+from sklearn.model_selection import train_test_split
+data_train, data_test, label_train, label_test = train_test_split(df, face_labels, random_state=7, test_size=0.15)
 
 
 if Test_PCA:
@@ -144,6 +160,12 @@ if Test_PCA:
   # data_train, and data_test.
   #
   # .. your code here ..
+    from sklearn.decomposition import PCA
+    pca = PCA(n_components=2, svd_solver='full')
+    pca.fit(data_train)
+    PCA(copy=True, n_components=2, whiten=False)
+    data_train = pca.transform(data_train)
+    data_test = pca.transform(data_test)
 
 else:
   # INFO: Isomap is used *before* KNeighbors to simplify your high dimensionality
@@ -167,8 +189,12 @@ else:
   #
   # .. your code here ..
 
-
-
+    from sklearn import manifold
+    iso = manifold.Isomap(n_neighbors=5, n_components=2)
+    iso.fit(data_train)
+   
+    data_train = iso.transform(data_train)
+    data_test = iso.transform(data_test)
 
 #
 # TODO: Implement KNeighborsClassifier here. You can use any K value from 1
@@ -178,7 +204,9 @@ else:
 # labels that those 2d representations should be.
 #
 # .. your code here ..
-
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(data_train, label_train)
 
 
 #
@@ -187,7 +215,7 @@ else:
 #
 # .. your code here ..
 
-
+print knn.score(data_test,label_test)
 
 # Chart the combined decision boundary, the training data as 2D plots, and
 # the testing data as small images so we can visually validate performance.

@@ -11,7 +11,7 @@ import time
 # You can adjust them after completing the lab
 C = 1
 kernel = 'linear'
-iterations = 5000   # TODO: Change to 200000 once you get to Question#2
+iterations = 200000   # TODO: Change to 200000 once you get to Question#2
 
 #
 # INFO: You can set this to false if you want to
@@ -99,6 +99,7 @@ def benchmark(model, X_train, X_test, y_train, y_test, wintitle='Figure 1'):
     # TODO: train the classifier on the training data / labels:
     #
     # .. your code here ..
+    model.fit(X_train,y_train)
   print "{0} Iterations Training Time: ".format(iterations), time.time() - s
 
 
@@ -108,9 +109,10 @@ def benchmark(model, X_train, X_test, y_train, y_test, wintitle='Figure 1'):
     # TODO: score the classifier on the testing data / labels:
     #
     # .. your code here ..
+    model.score(X_test,y_test)
   print "{0} Iterations Scoring Time: ".format(iterations), time.time() - s
   print "High-Dimensionality Score: ", round((score*100), 3)
-
+ 
 
 
 # 
@@ -119,19 +121,20 @@ def benchmark(model, X_train, X_test, y_train, y_test, wintitle='Figure 1'):
 # Indices shouldn't be doubled, nor weird headers...
 #
 # .. your code here ..
-
+X = pd.read_csv("C:/DAT207x/Programming with Python for Data Science/Module6/Datasets/wheat.data", index_col='id')
+print X.head()
 
 # INFO: An easy way to show which rows have nans in them
-#print X[pd.isnull(X).any(axis=1)]
+print X[pd.isnull(X).any(axis=1)]
 
 
 # 
 # TODO: Go ahead and drop any row with a nan
 #
 # .. your code here ..
+X.dropna(axis=0, inplace=True)
 
-
-
+        
 # 
 # INFO: # In the future, you might try setting the nan values to the
 # mean value of that column, the mean should only be calculated for
@@ -147,7 +150,11 @@ def benchmark(model, X_train, X_test, y_train, y_test, wintitle='Figure 1'):
 #
 # .. your code here ..
 
+y = X['wheat_type']
+X = X.drop(labels = ['wheat_type'], axis =1)
+y = y.map({'canadian':0, 'kama':1,'rosa':2})
 
+print X.head()
 
 # 
 # TODO: Split your data into test / train sets
@@ -156,6 +163,9 @@ def benchmark(model, X_train, X_test, y_train, y_test, wintitle='Figure 1'):
 #
 # .. your code here ..
 
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train,y_test = train_test_split(X,y, random_state=7, test_size=0.3)
 
 
 #
@@ -164,6 +174,8 @@ def benchmark(model, X_train, X_test, y_train, y_test, wintitle='Figure 1'):
 #
 # .. your code here ..
 
+from sklearn.svm import SVC
+svc = SVC(kernel='linear', C=C)
 
 #
 # TODO: Create an KNeighbors classifier named knn
@@ -171,8 +183,9 @@ def benchmark(model, X_train, X_test, y_train, y_test, wintitle='Figure 1'):
 #
 # .. your code here ..
 
+from sklearn.neighbors import KNeighborsClassifier
 
-
+knn = KNeighborsClassifier(n_neighbors=5)
 
 
 benchmark(knn, X_train, X_test, y_train, y_test, 'KNeighbors')

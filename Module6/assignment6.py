@@ -11,13 +11,17 @@ import time
 #
 # .. your code here ..
 
+X = pd.read_csv("C:\DAT207x\Programming with Python for Data Science\Module6\Datasets\dataset-har-PUC-Rio-ugulino.csv", sep=';')
 
-
+print X.head()
 #
 # TODO: Encode the gender column, 0 as male, 1 as female
 #
 # .. your code here ..
+print X.gender.unique()
 
+X['gender'] = X.gender.map({'Woman':1,'Man':0})
+print X.gender.unique()
 
 #
 # TODO: Clean up any column with commas in it
@@ -25,7 +29,15 @@ import time
 #
 # .. your code here ..
 
+print X.dtypes
+X['how_tall_in_meters'] = [x.replace(',','.') for x in X['how_tall_in_meters']]
+X['how_tall_in_meters'] = X['how_tall_in_meters'].astype(float)
 
+X['body_mass_index'] = [x.replace(',','.') for x in X['body_mass_index']]
+X['body_mass_index'] = X['body_mass_index'].astype(float)
+
+print X.z4.unique()
+print X.head()
 #
 # INFO: Check data types
 print X.dtypes
@@ -39,7 +51,13 @@ print X.dtypes
 #
 # .. your code here ..
 
+X['z4'] = pd.to_numeric(X['z4'], errors='coerce')
 
+print X.dtypes
+
+X = X.dropna(axis=0)
+
+print X.z4.isnull().sum()
 #
 # INFO: If you find any problematic records, drop them before calling the
 # to_numeric methods above...
@@ -49,12 +67,16 @@ print X.dtypes
 # TODO: Encode your 'y' value as a dummies version of your dataset's "class" column
 #
 # .. your code here ..
+y = X[['class']]
+y = pd.get_dummies(y, columns =['class'])
 
-
+print y.head()
 #
 # TODO: Get rid of the user and class columns
 #
 # .. your code here ..
+X = X.drop(labels=['user','class'], axis=1)
+print X.head()
 print X.describe()
 
 
@@ -70,7 +92,9 @@ print X[pd.isnull(X).any(axis=1)]
 #
 # .. your code here ..
 
+from sklearn.ensemble import RandomForestClassifier
 
+model = RandomForestClassifier(n_estimators=30, max_depth=10, oob_score=True, random_state=0)
 
 # 
 # TODO: Split your data into test / train sets
@@ -79,7 +103,9 @@ print X[pd.isnull(X).any(axis=1)]
 #
 # .. your code here ..
 
+from sklearn.model_selection import train_test_split
 
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.3,random_state=7)
 
 
 
@@ -89,6 +115,8 @@ s = time.time()
 # TODO: train your model on your training set
 #
 # .. your code here ..
+model.fit(X_train,y_train)
+
 print "Fitting completed in: ", time.time() - s
 
 
@@ -106,6 +134,9 @@ s = time.time()
 # TODO: score your model on your test set
 #
 # .. your code here ..
+
+score = model.score(X_test,y_test)
+
 print "Score: ", round(score*100, 3)
 print "Scoring completed in: ", time.time() - s
 

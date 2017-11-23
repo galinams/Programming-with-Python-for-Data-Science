@@ -83,7 +83,8 @@ def drawPlane(model, X_test, y_test, title, R2):
 # called X:
 #
 # .. your code here ..
-
+X = pd.read_csv("C:\DAT207x\Programming with Python for Data Science\Module5\Datasets\College.csv", index_col=0)
+print X.head()
 
 #
 # INFO: This line isn't necessary for your purposes; but we'd just
@@ -103,8 +104,9 @@ X.Private = X.Private.map({'Yes':1, 'No':0})
 #
 # .. your code here ..
 
+from sklearn import linear_model
 
-
+model = linear_model.LinearRegression()
 
 #
 # INFO: The first relationship we're interested in is the 
@@ -119,12 +121,28 @@ X.Private = X.Private.map({'Yes':1, 'No':0})
 # a random_state of 7.
 #
 # .. your code here ..
+from sklearn.model_selection import train_test_split
+roomboard = X[['Room.Board']]
+accepted = X[['Accept']]
+print type(roomboard)
+print type(accepted)
+print roomboard.shape
+print accepted.shape
 
-#
+
+X_train,X_test,y_train,y_test = train_test_split(roomboard,accepted, random_state=7, test_size=0.3)
+
+print X_test.shape
+print y_test.shape
+
 # TODO: Fit and score your model appropriately. Store the score in the
 # score variable.
 #
 # .. your code here ..
+model.fit(X_train,y_train)
+score = model.score(X_test,y_test)
+
+
 
 # INFO: We'll take it from here, buddy:
 drawLine(model, X_test, y_test, "Accept(Room&Board)", score)
@@ -138,7 +156,15 @@ drawLine(model, X_test, y_test, "Accept(Room&Board)", score)
 # per college.
 #
 # .. your code here ..
+
+enroll = X[['Enroll']]
+accepted = X[['Accept']]
+X_train,X_test,y_train,y_test = train_test_split(enroll,accepted, random_state=7, test_size=0.3)
+model.fit(X_train,y_train)
+score = model.score(X_test,y_test)
+
 drawLine(model, X_test, y_test, "Accept(Enroll)", score)
+
 
 
 
@@ -148,6 +174,12 @@ drawLine(model, X_test, y_test, "Accept(Enroll)", score)
 # students per college.
 #
 # .. your code here ..
+failed = X[['F.Undergrad']]
+accepted = X[['Accept']]
+X_train,X_test,y_train,y_test = train_test_split(failed,accepted, random_state=7, test_size=0.3)
+model.fit(X_train,y_train)
+score = model.score(X_test,y_test)
+
 drawLine(model, X_test, y_test, "Accept(F.Undergrad)", score)
 
 
@@ -164,6 +196,13 @@ drawLine(model, X_test, y_test, "Accept(F.Undergrad)", score)
 # inputs. Your training labels will remain a single slice.
 #
 # .. your code here ..
+
+room_enrolled = X[['Room.Board','Enroll']]
+accepted = X[['Accept']]
+X_train,X_test,y_train,y_test = train_test_split(room_enrolled,accepted, random_state=7, test_size=0.3)
+model.fit(X_train,y_train)
+score = model.score(X_test,y_test)
+
 drawPlane(model, X_test, y_test, "Accept(Room&Board,Enroll)", score)
 
 

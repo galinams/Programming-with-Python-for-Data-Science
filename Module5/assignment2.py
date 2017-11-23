@@ -2,6 +2,7 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 import matplotlib
+from sklearn.cluster import KMeans
 
 matplotlib.style.use('ggplot') # Look Pretty
 
@@ -23,15 +24,21 @@ def showandtell(title=None):
 # Convert the date using pd.to_datetime, and the time using pd.to_timedelta
 #
 # .. your code here ..
+df = pd.read_csv("C:\DAT207x\Programming with Python for Data Science\Module5\Datasets\CDR.csv")
+print df.head()
 
+df.CallDate = pd.to_datetime(df.CallDate)
+df.CallTime = pd.to_timedelta(df.CallTime)
 
+print df.dtypes
 #
 # TODO: Get a distinct list of "In" phone numbers (users) and store the values in a
 # regular python list.
 # Hint: https://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.tolist.html
 #
 # .. your code here ..
-
+users = df.In.unique().tolist()
+print users
 
 # 
 # TODO: Create a slice called user1 that filters to only include dataset records where the
@@ -39,11 +46,11 @@ def showandtell(title=None):
 # that is, the very first number in the dataset
 #
 # .. your code here ..
-
+user1 = df[df['In']==users[0]]
 
 # INFO: Plot all the call locations
 user1.plot.scatter(x='TowerLon', y='TowerLat', c='gray', alpha=0.1, title='Call Locations')
-showandtell()  # Comment this line out when you're ready to proceed
+#showandtell()  # Comment this line out when you're ready to proceed
 
 
 #
@@ -70,6 +77,8 @@ showandtell()  # Comment this line out when you're ready to proceed
 #
 # .. your code here ..
 
+user1 = user1[(user1['DOW']=='Sat') | (user1['DOW']=='Sun')]
+
 
 #
 # TODO: Further filter it down for calls that are came in either before 6AM OR after 10pm (22:00:00).
@@ -80,8 +89,10 @@ showandtell()  # Comment this line out when you're ready to proceed
 # slice, print out its length:
 #
 # .. your code here ..
+user1 = user1[(user1['CallTime']<'06:00:01') | (user1['CallTime']>'22:00:00')]
+print len(user1)
 
-
+print user1.columns
 #
 # INFO: Visualize the dataframe with a scatter plot as a sanity check. Since you're familiar
 # with maps, you know well that your X-Coordinate should be Longitude, and your Y coordinate
@@ -96,7 +107,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 ax.scatter(user1.TowerLon,user1.TowerLat, c='g', marker='o', alpha=0.2)
 ax.set_title('Weekend Calls (<6am or >10p)')
-showandtell()  # TODO: Comment this line out when you're ready to proceed
+#showandtell()  # TODO: Comment this line out when you're ready to proceed
 
 
 
@@ -115,9 +126,13 @@ showandtell()  # TODO: Comment this line out when you're ready to proceed
 # Hint: Make sure you graph the CORRECT coordinates. This is part of your domain expertise.
 #
 # .. your code here ..
+model = KMeans(n_clusters=2)
+model.fit(user1[['TowerLon','TowerLat']])
+centroids = model.cluster_centers_
+ax.scatter(centroids[:,0], centroids[:,1], marker='x', c='red', alpha=0.5, linewidths=3, s=169)
+print centroids
 
-
-showandtell()  # TODO: Comment this line out when you're ready to proceed
+#showandtell()  # TODO: Comment this line out when you're ready to proceed
 
 
 
@@ -126,4 +141,32 @@ showandtell()  # TODO: Comment this line out when you're ready to proceed
 # locations. You might want to use a for-loop, unless you enjoy typing.
 #
 # .. your code here ..
+locations = []
 
+for user in users:
+    print user
+
+for user_id in users:
+    print "START**********************************************************"
+    print 'user id' 
+    print user_id
+    user_df = df[df['In'] == user_id]
+    print '--------------------------------------------------------'
+   
+    
+    user_df_weekend = user_df[(user_df['DOW']=='Sat') | (user_df['DOW']=='Sun')]
+    print "WEEKEND"
+    
+    
+    
+    user_df_time = user_df_weekend[(user_df_weekend['CallTime']<'06:00:01') | (user_df_weekend['CallTime']>'22:00:00')]
+    print "user call time"
+    
+    model = KMeans(n_clusters=1)
+    model.fit(user_df_time[['TowerLon','TowerLat']])
+    centroids = model.cluster_centers_
+    ax.scatter(centroids[:,0], centroids[:,1], marker='x', c='red', alpha=0.5, linewidths=3, s=169)
+    locations.append(centroids)
+    print centroids
+
+print "Locations", locations

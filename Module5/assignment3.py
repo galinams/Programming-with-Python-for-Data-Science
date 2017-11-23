@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import matplotlib
-
+from sklearn.cluster import KMeans
 matplotlib.style.use('ggplot') # Look Pretty
 
 #
@@ -48,6 +48,13 @@ def doKMeans(data, clusters=0):
   # here, which will be a SKLearn K-Means model for this to work.
   #
   # .. your code here ..
+  model = KMeans(n_clusters=clusters)
+  model.fit(data[['TowerLat','TowerLon']])
+  centroids = model.cluster_centers_
+  fig = plt.figure()
+  ax = fig.add_subplot(111)
+  ax.scatter(centroids[:,0],centroids[:,1], marker='x',c='red',alpha=0.5,linewidths=3)
+  print centroids
   return model
 
 
@@ -57,6 +64,13 @@ def doKMeans(data, clusters=0):
 # Convert the date using pd.to_datetime, and the time using pd.to_timedelta
 #
 # .. your code here ..
+
+df = pd.read_csv("C:\DAT207x\Programming with Python for Data Science\Module5\Datasets\CDR.csv")
+print df.head()
+print df.dtypes
+
+df.CallDate = pd.to_datetime(df.CallDate)
+df.CallTime = pd.to_timedelta(df.CallTime)
 
 
 
@@ -69,7 +83,7 @@ def doKMeans(data, clusters=0):
 # the same order they appear (uniquely) in your dataset:
 #
 # .. your code here ..
-
+unique_numbers = df.In.unique()
 
 #
 # INFO: The locations map above should be too "busy" to really wrap your head around. This
@@ -96,13 +110,13 @@ print "\n\nExamining person: ", 0
 # "In" feature (user phone number) is equal to the first number on your unique list above
 #
 # .. your code here ..
-
+user1 = df[df['In']==unique_numbers[0]]
 
 #
 # TODO: Alter your slice so that it includes only Weekday (Mon-Fri) values.
 #
 # .. your code here ..
-
+user1 = user1[(user1['DOW']!='Sat')|(user1['DOW']!='Sun')]
 
 #
 # TODO: The idea is that the call was placed before 5pm. From Midnight-730a, the user is
@@ -111,14 +125,17 @@ print "\n\nExamining person: ", 0
 # So the assumption is that most of the time is spent either at work, or in 2nd, at home.
 #
 # .. your code here ..
-
+user1 = user1[user1['CallTime']<'17:00:00']
 
 #
 # TODO: Plot the Cell Towers the user connected to
 #
 # .. your code here ..
 
-
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.scatter(user1.TowerLon,user1.TowerLat, c='g', marker='o', alpha=0.2)
+ax.set_title('Weekday Calls before 5pm')
 
 #
 # INFO: Run K-Means with K=3 or K=4. There really should only be a two areas of concentration. If you
